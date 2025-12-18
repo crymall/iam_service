@@ -15,6 +15,8 @@ const CreateDocumentForm = ({ onSuccess }) => {
     setDocumentsLoading(false);
     
     if (success && onSuccess) {
+      setTitle('');
+      setContent('');
       onSuccess();
     }
   };
@@ -37,7 +39,7 @@ const CreateDocumentForm = ({ onSuccess }) => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <Button type="submit" documentsLoading={documentsLoading}>Save Document</Button>
+        <Button type="submit" loading={documentsLoading}>Save Document</Button>
       </Stack>
     </form>
   );

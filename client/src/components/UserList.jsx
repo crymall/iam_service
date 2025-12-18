@@ -1,10 +1,26 @@
-import { Table, Badge, ActionIcon } from "@mantine/core";
+import { Table, Badge, ActionIcon, Loader, Center, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import useData from "../context/data/useData";
 import Can from "./Can";
 
 const UserList = () => {
-  const { users, deleteUser } = useData();
+  const { users, usersLoading, deleteUser } = useData();
+
+  if (usersLoading) {
+    return (
+      <Center p="xl">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
+  if (!users || users.length === 0) {
+    return (
+      <Text c="dimmed" ta="center" mt="md">
+        No users found.
+      </Text>
+    );
+  }
 
   const rows = users.map((user) => (
     <Table.Tr key={user.id}>
@@ -24,11 +40,17 @@ const UserList = () => {
         </Badge>
       </Table.Td>
       <Table.Td>
-        <Can perform="write:users">
+        <Can perform="delete:users">
           <ActionIcon
             color="red"
             variant="subtle"
-            onClick={() => deleteUser(user.id)}
+            onClick={() => {
+              if (
+                confirm(`Are you sure you want to delete ${user.username}?`)
+              ) {
+                deleteUser(user.id);
+              }
+            }}
           >
             <IconTrash size={16} />
           </ActionIcon>
