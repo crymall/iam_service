@@ -40,7 +40,7 @@ const UserList = () => {
         </Badge>
       </Table.Td>
       <Table.Td>
-        <Can perform="delete:users">
+        <Can perform="write:users">
           <ActionIcon
             color="red"
             variant="subtle"

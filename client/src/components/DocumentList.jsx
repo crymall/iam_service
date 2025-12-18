@@ -26,10 +26,10 @@ const DocumentList = () => {
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
       {documents.map((doc) => (
         <Card key={doc.id} shadow="sm" padding="lg" radius="md" withBorder>
-          <GroupQl justify="space-between" mt="md" mb="xs">
+          <Group justify="space-between" mt="md" mb="xs">
             <Text fw={500}>{doc.title}</Text>
             <Badge color="blue" variant="light">Confidential</Badge>
-          </GroupQl>
+          </Group>
 
           <Text size="sm" c="dimmed" mb="lg" style={{ minHeight: '60px' }}>
             {doc.content}
