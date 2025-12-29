@@ -27,6 +27,7 @@ const runMigrations = async () => {
     console.log('Database initialized successfully.');
   } catch (err) {
     console.error('Migration failed:', err);
+    process.exit(1);
   } finally {
     pool.end();
   }

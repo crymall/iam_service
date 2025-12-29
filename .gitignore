@@ -12,6 +12,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 logs
+k3s-remote.yaml
+issuer.yaml
 *.log
 .env
 .env.local
