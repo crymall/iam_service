@@ -7,62 +7,58 @@ import nodemailer from "nodemailer";
 
 const authRouter = express.Router();
 
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS
-//   }
-// });
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const sendVerificationEmail = async (email, code) => {
-  console.log(`=========================================`);
-  console.log(`[EMAIL SIMULATION] To: ${email}`);
-  console.log(`[EMAIL SIMULATION] Your 2FA Code is: ${code}`);
-  console.log(`=========================================`);
-//   const mailOptions = {
-//     from: `"Midden 2FA" <${process.env.EMAIL_USER}>`,
-//     to: email,
-//     subject: 'Your Verification Code',
-//     text: `Your 2FA login code is: ${code}. It expires in 10 minutes.`,
-//     html: `<p>Your 2FA login code is: <strong>${code}</strong></p><p>It expires in 10 minutes.</p>`
-//   };
+  const mailOptions = {
+    from: `"Midden 2FA" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Your Verification Code",
+    text: `Your 2FA login code is: ${code}. It expires in 10 minutes.`,
+    html: `<p>Your 2FA login code is: <strong>${code}</strong></p><p>It expires in 10 minutes.</p>`,
+  };
 
-//   try {
-//     await transporter.sendMail(mailOptions);
-//     console.log(`[Email Sent] To: ${email}`);
-//   } catch (error) {
-//     console.error("[Email Failed]", error);
-//   }
-// };
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`[Email Sent] To: ${email}`);
+  } catch (error) {
+    console.error("[Email Failed]", error);
+  }
+};
 
-// authRouter.post("/register", async (req, res) => {
-//   const { username, email, password } = req.body;
+authRouter.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
 
-//   try {
-//     const salt = await bcrypt.genSalt(10);
-//     const hash = await bcrypt.hash(password, salt);
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
 
-//     const roleRes = await pool.query(
-//       "SELECT id FROM roles WHERE name = 'Editor'",
-//     );
-//     const viewerRoleId = roleRes.rows[0]?.id || 2;
+    const roleRes = await pool.query(
+      "SELECT id FROM roles WHERE name = 'Editor'",
+    );
+    const viewerRoleId = roleRes.rows[0]?.id || 2;
 
-//     const result = await pool.query(
-//       "INSERT INTO users (username, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING id, username, email",
-//       [username, email, hash, viewerRoleId],
-//     );
+    const result = await pool.query(
+      "INSERT INTO users (username, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING id, username, email",
+      [username, email, hash, viewerRoleId],
+    );
 
-//     res.status(201).json({ message: "User registered", user: result.rows[0] });
-//   } catch (err) {
-//     console.error(err);
-//     if (err.code === "23505") {
-//       return res
-//         .status(409)
-//         .json({ error: "Username or email already exists" });
-//     }
-//     res.status(500).json({ error: "Server error" });
-//   }
+    res.status(201).json({ message: "User registered", user: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    if (err.code === "23505") {
+      return res
+        .status(409)
+        .json({ error: "Username or email already exists" });
+    }
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 authRouter.post("/login", async (req, res) => {
