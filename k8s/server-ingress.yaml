@@ -11,10 +11,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - 96.126.106.29.nip.io
-    secretName: iam-tls-secret
+    - midden.reedgaines.com
+    secretName: iam-midden-tls-secret
   rules:
-  - host: 96.126.106.29.nip.io
+  - host: midden.reedgaines.com
     http:
       paths:
       - path: /iam(/|$)(.*)
