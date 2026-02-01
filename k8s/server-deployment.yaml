@@ -41,6 +41,16 @@ spec:
             secretKeyRef:
               name: iam-secrets
               key: jwt_secret
+        - name: EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: iam-secrets
+              key: email_user
+        - name: EMAIL_PASS
+          valueFrom:
+            secretKeyRef:
+              name: iam-secrets
+              key: email_pass
 ---
 apiVersion: v1
 kind: Service

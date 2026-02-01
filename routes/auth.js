@@ -3,15 +3,33 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const authRouter = express.Router();
 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
 const sendVerificationEmail = async (email, code) => {
-  // placeholder test
-  console.log(`=========================================`);
-  console.log(`[EMAIL SIMULATION] To: ${email}`);
-  console.log(`[EMAIL SIMULATION] Your 2FA Code is: ${code}`);
-  console.log(`=========================================`);
+  const mailOptions = {
+    from: `"Midden 2FA" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Your Verification Code',
+    text: `Your 2FA login code is: ${code}. It expires in 10 minutes.`,
+    html: `<p>Your 2FA login code is: <strong>${code}</strong></p><p>It expires in 10 minutes.</p>`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`[Email Sent] To: ${email}`);
+  } catch (error) {
+    console.error("[Email Failed]", error);
+  }
 };
 
 authRouter.post("/register", async (req, res) => {
