@@ -40,7 +40,7 @@ usersRouter.delete(
   },
 );
 
-usersRouter.put(
+usersRouter.patch(
   "/:id/role",
   authenticateToken,
   authorizePermission("write:users"),
