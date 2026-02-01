@@ -22,8 +22,8 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api/login", authRouter);
-app.use("/api/users", usersRouter);
-app.use("/api", indexRouter);
+app.use("/login", authRouter);
+app.use("/users", usersRouter);
+app.use("/", indexRouter);
 
 export default app;
