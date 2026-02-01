@@ -6,7 +6,6 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 
 import authRouter from "./routes/auth.js";
-import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,8 +21,7 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/login", authRouter);
 app.use("/users", usersRouter);
-app.use("/", indexRouter);
+app.use("/", authRouter);
 
 export default app;

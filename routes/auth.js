@@ -135,4 +135,8 @@ authRouter.post("/verify-2fa", async (req, res) => {
   }
 });
 
+authRouter.get("/", (req, res) => {
+  res.send("At least this looks OK!");
+});
+
 export default authRouter;
