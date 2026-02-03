@@ -118,7 +118,7 @@ authRouter.post("/verify-2fa", async (req, res) => {
 
     const userRes = await pool.query(
       `
-        SELECT u.id, u.username, r.name as role, ARRAY_AGG(p.slug) as permissions
+        SELECT u.id, u.username, u.email, r.name as role, ARRAY_AGG(p.slug) as permissions
         FROM users u
         JOIN roles r ON u.role_id = r.id
         LEFT JOIN role_permissions rp ON r.id = rp.role_id
@@ -135,6 +135,7 @@ authRouter.post("/verify-2fa", async (req, res) => {
       {
         id: user.id,
         username: user.username,
+        email: user.email,
         role: user.role,
         permissions: user.permissions,
       },
