@@ -13,7 +13,18 @@ const seedsSql = fs.readFileSync(seedsPath, { encoding: 'utf8' });
 
 const runMigrations = async () => {
   try {
-    console.log(pool)
+    let retries = 5;
+    while (retries) {
+      try {
+        await pool.query('SELECT NOW()');
+        break;
+      } catch (err) {
+        console.log(`Database not ready, retrying in 5s... (${retries} left)`);
+        retries -= 1;
+        await new Promise((res) => setTimeout(res, 5000));
+      }
+    }
+
     console.log('Starting database initialization...');
 
     console.log('Building tables...');

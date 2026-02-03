@@ -29,3 +29,4 @@ logs
 Thumbs.db
 .eslintcache
 .tsbuildinfo
+docker-compose.dev.yml

@@ -81,12 +81,17 @@ authRouter.post("/login", async (req, res) => {
       [user.id, code, expiresAt],
     );
 
-    await sendVerificationEmail(user.email, code);
+    if (process.env.SKIP_EMAIL_VERIFICATION === "true") {
+      console.log(`[DEV] Verification code for ${user.email}: ${code}`);
+    } else {
+      await sendVerificationEmail(user.email, code);
+    }
 
     res.json({
       message: "Verification code sent to your email",
       userId: user.id,
       temp_token: "Enable this if you want stateless intermediate tokens",
+      dev_code: process.env.SKIP_EMAIL_VERIFICATION === "true" ? code : undefined,
     });
   } catch (err) {
     console.error(err);
