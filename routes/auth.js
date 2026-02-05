@@ -39,9 +39,9 @@ authRouter.post("/register", async (req, res) => {
     const hash = await bcrypt.hash(password, salt);
 
     const roleRes = await pool.query(
-      "SELECT id FROM roles WHERE name = 'Editor'",
+      "SELECT id FROM roles WHERE name = 'Viewer'",
     );
-    const viewerRoleId = roleRes.rows[0]?.id || 2;
+    const viewerRoleId = roleRes.rows[0]?.id || 3;
 
     const result = await pool.query(
       "INSERT INTO users (username, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING id, username, email",

@@ -34,9 +34,31 @@ usersRouter.delete(
   authenticateToken,
   authorizePermission("write:users"),
   async (req, res) => {
-    res.json({
-      message: `Simulation: User ${req.params.id} deleted (not really).`,
-    });
+    const userId = req.params.id;
+
+    try {
+      const userRes = await pool.query(
+        `SELECT r.name FROM users u
+         LEFT JOIN roles r ON u.role_id = r.id
+         WHERE u.id = $1`,
+        [userId],
+      );
+
+      if (userRes.rowCount === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (userRes.rows[0].name === "Admin") {
+        return res.status(403).json({ error: "Cannot delete an Admin user" });
+      }
+
+      await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+
+      res.json({ message: "User deleted successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Database error" });
+    }
   },
 );
 
