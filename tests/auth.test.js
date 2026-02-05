@@ -61,6 +61,27 @@ describe('Auth API', () => {
       expect(mockQuery).toHaveBeenCalledTimes(2);
     });
 
+    it('should assign Viewer role to new user', async () => {
+      const userData = {
+        username: faker.internet.userName(),
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+      };
+      const viewerRoleId = 3;
+
+      // Mock 1: Role lookup
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: viewerRoleId }] });
+      
+      // Mock 2: User insertion
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, username: userData.username, email: userData.email }],
+      });
+
+      await request(app).post('/register').send(userData);
+      
+      expect(mockQuery.mock.calls[1][1][3]).toBe(viewerRoleId);
+    });
+
     it('should return 409 if user already exists', async () => {
       // Conditionally suppress console.error only for the expected error
       const originalError = console.error;

@@ -68,12 +68,46 @@ describe('Users API', () => {
   });
 
   describe('DELETE /users/:id', () => {
-    it('should return a simulation message', async () => {
+    it('should delete a user successfully', async () => {
       const userId = 123;
+
+      // Mock 1: User lookup (Not Admin)
+      mockQuery.mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ name: 'User' }],
+      });
+
+      // Mock 2: Delete operation
+      mockQuery.mockResolvedValueOnce({});
+
       const res = await request(app).delete(`/users/${userId}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.message).toContain(`User ${userId} deleted`);
+      expect(res.body.message).toBe('User deleted successfully');
+      expect(mockQuery).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return 403 when deleting an Admin', async () => {
+      // Mock 1: User lookup (Is Admin)
+      mockQuery.mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ name: 'Admin' }],
+      });
+
+      const res = await request(app).delete('/users/1');
+
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('Cannot delete an Admin user');
+    });
+
+    it('should return 404 if user not found', async () => {
+      // Mock 1: User lookup (Not found)
+      mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
+
+      const res = await request(app).delete('/users/999');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('User not found');
     });
   });
 
