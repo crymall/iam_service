@@ -159,6 +159,23 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(401);
     });
+
+    it('should login guest user immediately without 2FA', async () => {
+      const res = await request(app).post('/login').send({
+        username: 'guest',
+        password: 'guest',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('token');
+      expect(res.body.user).toEqual({
+        username: 'guest',
+        role: 'Viewer',
+        permissions: ['read:public'],
+      });
+      expect(mockQuery).not.toHaveBeenCalled();
+      expect(mockSendMail).not.toHaveBeenCalled();
+    });
   });
 
   describe('POST /verify-2fa', () => {
