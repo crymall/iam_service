@@ -39,13 +39,13 @@ authRouter.post("/register", async (req, res) => {
     const hash = await bcrypt.hash(password, salt);
 
     const roleRes = await pool.query(
-      "SELECT id FROM roles WHERE name = 'Viewer'",
+      "SELECT id FROM roles WHERE name = 'Editor'",
     );
-    const viewerRoleId = roleRes.rows[0]?.id || 3;
+    const editorRoleId = roleRes.rows[0]?.id || 2;
 
     const result = await pool.query(
       "INSERT INTO users (username, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING id, username, email",
-      [username, email, hash, viewerRoleId],
+      [username, email, hash, editorRoleId],
     );
 
     res.status(201).json({ message: "User registered", user: result.rows[0] });
