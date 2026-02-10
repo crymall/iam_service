@@ -16,9 +16,3 @@ VALUES
   ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'read:users')),
   ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'write:users'))
 ON CONFLICT DO NOTHING;
-
-INSERT INTO users (username, email, password_hash, role_id) VALUES 
-  ('alice_admin',  'reed.gaines+alice@gmail.com',   '$2b$10$xKzbxFgP3TVU4PgPZ5.lYuzURSTrFAuv4Ea1J68We3b2s0zR/PtcS', (SELECT id FROM roles WHERE name = 'Admin')),
-  ('bob_editor',   'reed.gaines+bob@gmail.com',     '$2b$10$xKzbxFgP3TVU4PgPZ5.lYuzURSTrFAuv4Ea1J68We3b2s0zR/PtcS', (SELECT id FROM roles WHERE name = 'Editor')),
-  ('charlie_view', 'reed.gaines+charlie@gmail.com', '$2b$10$xKzbxFgP3TVU4PgPZ5.lYuzURSTrFAuv4Ea1J68We3b2s0zR/PtcS', (SELECT id FROM roles WHERE name = 'Viewer'))
-ON CONFLICT (username) DO NOTHING;
