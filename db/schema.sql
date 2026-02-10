@@ -1,24 +1,24 @@
-DROP TABLE IF EXISTS documents, role_permissions, users, roles, permissions, verification_codes CASCADE;
+-- DROP TABLE IF EXISTS documents, role_permissions, users, roles, permissions, verification_codes CASCADE;
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) UNIQUE NOT NULL,
   description TEXT
 );
 
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
   id SERIAL PRIMARY KEY,
   slug VARCHAR(50) UNIQUE NOT NULL,
   description TEXT
 );
 
-CREATE TABLE role_permissions (
+CREATE TABLE IF NOT EXISTS role_permissions (
   role_id INT REFERENCES roles(id) ON DELETE CASCADE,
   permission_id INT REFERENCES permissions(id) ON DELETE CASCADE,
   PRIMARY KEY (role_id, permission_id)
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE users (
   role_id INT REFERENCES roles(id)
 );
 
-CREATE TABLE verification_codes (
+CREATE TABLE IF NOT EXISTS verification_codes (
   id SERIAL PRIMARY KEY,
   user_id INT REFERENCES users(id) ON DELETE CASCADE,
   code VARCHAR(6) NOT NULL,
