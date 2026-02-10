@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 // 1. Mock Database
 const mockQuery = jest.fn();
-jest.unstable_mockModule('../config/db.js', () => ({
+jest.unstable_mockModule('../../config/db.js', () => ({
   default: {
     query: mockQuery,
   },
@@ -12,19 +12,19 @@ jest.unstable_mockModule('../config/db.js', () => ({
 // 2. Mock Middleware
 // We bypass actual JWT checks to test the route logic directly.
 // We assume the user is authenticated for these unit tests.
-jest.unstable_mockModule('../middleware/authorize.js', () => ({
+jest.unstable_mockModule('../../middleware/authorize.js', () => ({
   authenticateToken: (req, res, next) => next(),
   authorizePermission: (permission) => (req, res, next) => next(),
 }));
 
 // 3. Mock Auth Router (Isolation)
 // Prevents loading the auth routes and their dependencies
-jest.unstable_mockModule('../routes/auth.js', () => ({
+jest.unstable_mockModule('../auth.js', () => ({
   default: (req, res, next) => next(),
 }));
 
 // 4. Import app and supertest dynamically AFTER mocks are defined
-const { default: app } = await import('../app.js');
+const { default: app } = await import('../../app.js');
 const request = (await import('supertest')).default;
 
 describe('Users API', () => {

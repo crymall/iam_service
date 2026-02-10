@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 // 1. Mock the database configuration
 // We mock the default export of db.js to intercept query calls
 const mockQuery = jest.fn();
-jest.unstable_mockModule('../config/db.js', () => ({
+jest.unstable_mockModule('../../config/db.js', () => ({
   default: {
     query: mockQuery,
   },
@@ -23,12 +23,12 @@ jest.unstable_mockModule('nodemailer', () => ({
 
 // 3. Mock Users Router to isolate Auth testing
 // This prevents errors if the users route has dependencies we haven't mocked
-jest.unstable_mockModule('../routes/users.js', () => ({
+jest.unstable_mockModule('../users.js', () => ({
   default: (req, res, next) => next(),
 }));
 
 // 4. Import app and supertest dynamically AFTER mocks are defined
-const { default: app } = await import('../app.js');
+const { default: app } = await import('../../app.js');
 const request = (await import('supertest')).default;
 
 describe('Auth API', () => {
