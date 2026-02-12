@@ -48,7 +48,29 @@ authRouter.post("/register", async (req, res) => {
       [username, email, hash, editorRoleId],
     );
 
-    res.status(201).json({ message: "User registered", user: result.rows[0] });
+    const newUser = result.rows[0];
+
+    try {
+      const canteenRes = await fetch(`${process.env.CANTEEN_API_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.MIDDEN_API_KEY,
+        },
+        body: JSON.stringify({
+          username: newUser.username,
+          iam_id: newUser.id,
+        }),
+      });
+
+      if (!canteenRes.ok) {
+        console.error("Failed to sync user to Canteen:", await canteenRes.text());
+      }
+    } catch (err) {
+      console.error("Error syncing user to Canteen:", err);
+    }
+
+    res.status(201).json({ message: "User registered", user: newUser });
   } catch (err) {
     console.error(err);
     if (err.code === "23505") {
