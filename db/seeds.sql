@@ -2,7 +2,9 @@
 
 INSERT INTO permissions (slug, description) VALUES
   ('read:users',       'Can view user profiles'),
-  ('write:users',      'Can manage users and roles')
+  ('write:users',      'Can manage users and roles'),
+  ('read:canteen',     'Can view Canteen recipes'),
+  ('write:canteen',    'Can edit Canteen recipes')
 ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO roles (name, description) VALUES
