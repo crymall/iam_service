@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS documents, role_permissions, users, roles, permissions, verification_codes CASCADE;
+-- DROP TABLE IF EXISTS documents, role_permissions, users, roles, permissions, verification_codes CASCADE;
 
 CREATE TABLE IF NOT EXISTS roles (
   id SERIAL PRIMARY KEY,
