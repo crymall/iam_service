@@ -48,6 +48,6 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        sed -i 's|crymall/iam-server:latest|crymall/iam-server:${{ github.sha }}|g' k8s/server-deployment.yaml
+        sed -i 's|crymall/iam-server:.*|crymall/iam-server:${{ github.sha }}|g' k8s/server-deployment.yaml
         kubectl apply -f k8s/
         kubectl rollout status deployment/iam-server
