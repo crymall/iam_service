@@ -20,7 +20,7 @@ spec:
         - containerPort: 3000
         env:
         - name: DB_HOST
-          value: "postgres-service"
+          value: "iam-postgres-service"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
