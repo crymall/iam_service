@@ -1,4 +1,4 @@
--- TRUNCATE TABLE users, roles, permissions, role_permissions, verification_codes RESTART IDENTITY CASCADE;
+TRUNCATE TABLE users, roles, permissions, role_permissions, verification_codes RESTART IDENTITY CASCADE;
 
 INSERT INTO permissions (slug, description) VALUES
   ('read:users',       'Can view user profiles'),
