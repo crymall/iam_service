@@ -16,5 +16,10 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO role_permissions (role_id, permission_id)
 VALUES 
   ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'read:users')),
-  ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'write:users'))
+  ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'write:users')),
+  ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'write:canteen')),
+  ((SELECT id FROM roles WHERE name = 'Editor'), (SELECT id FROM permissions WHERE slug = 'write:canteen')),
+  ((SELECT id FROM roles WHERE name = 'Admin'), (SELECT id FROM permissions WHERE slug = 'read:canteen')),
+  ((SELECT id FROM roles WHERE name = 'Editor'), (SELECT id FROM permissions WHERE slug = 'read:canteen')),
+  ((SELECT id FROM roles WHERE name = 'Viewer'), (SELECT id FROM permissions WHERE slug = 'read:canteen'))
 ON CONFLICT DO NOTHING;
