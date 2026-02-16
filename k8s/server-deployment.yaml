@@ -46,7 +46,7 @@ spec:
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: iam-secrets
+              name: midden-global-secrets
               key: jwt_secret
         - name: EMAIL_USER
           valueFrom:
