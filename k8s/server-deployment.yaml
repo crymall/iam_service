@@ -58,6 +58,9 @@ spec:
             secretKeyRef:
               name: iam-secrets
               key: email_pass
+        - name: NODE_ENV
+          value: production
+
 ---
 apiVersion: v1
 kind: Service
