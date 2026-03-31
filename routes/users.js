@@ -2,7 +2,7 @@ import express from "express";
 import pool from "../config/db.js";
 import {
   authenticateToken,
-  authorizePermission,
+  authorizePermissions,
 } from "../middleware/authorize.js";
 
 const usersRouter = express.Router();
@@ -11,7 +11,6 @@ const usersRouter = express.Router();
 usersRouter.get(
   "/",
   authenticateToken,
-  authorizePermission("read:users"),
   async (req, res) => {
     try {
       const query = `
@@ -29,10 +28,37 @@ usersRouter.get(
   },
 );
 
+usersRouter.get(
+  "/:id",
+  authenticateToken,
+  async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+      const query = `
+        SELECT u.id, u.username, u.email, r.name as role 
+        FROM users u 
+        JOIN roles r ON u.role_id = r.id 
+        WHERE u.id = $1;
+      `;
+      const result = await pool.query(query, [userId]);
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ user: result.rows[0] });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Database error" });
+    }
+  },
+);
+
 usersRouter.delete(
   "/:id",
   authenticateToken,
-  authorizePermission("write:users"),
+  authorizePermissions("write:users"),
   async (req, res) => {
     const userId = req.params.id;
 
@@ -65,7 +91,7 @@ usersRouter.delete(
 usersRouter.patch(
   "/:id/role",
   authenticateToken,
-  authorizePermission("write:users"),
+  authorizePermissions("write:users"),
   async (req, res) => {
     const { roleId } = req.body;
     const userId = req.params.id;

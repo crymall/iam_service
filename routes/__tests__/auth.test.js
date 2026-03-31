@@ -185,7 +185,8 @@ describe('Auth API', () => {
       const res = await request(app).post('/verify-2fa').send({ userId, code });
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('token');
+      expect(res.headers['set-cookie']).toBeDefined();
+      expect(res.headers['set-cookie'][0]).toMatch(/token=/);
       expect(res.body.user.role).toBe('Editor');
     });
 
@@ -197,6 +198,38 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid or expired code');
+    });
+  });
+
+  describe('GET /verify', () => {
+    it('should return 200 and user data if valid token cookie is provided', async () => {
+      const jwt = (await import('jsonwebtoken')).default;
+      const token = jwt.sign(
+        { id: 1, username: 'testuser', role: 'Editor', permissions: ['read'] },
+        'test_secret'
+      );
+
+      const res = await request(app)
+        .get('/verify')
+        .set('Cookie', [`token=${token}`]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.username).toBe('testuser');
+      expect(res.body.user.role).toBe('Editor');
+    });
+
+    it('should return 401 if no token is provided', async () => {
+      const res = await request(app).get('/verify');
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('POST /logout', () => {
+    it('should clear the token cookie', async () => {
+      const res = await request(app).post('/logout');
+      expect(res.status).toBe(200);
+      expect(res.headers['set-cookie']).toBeDefined();
+      expect(res.headers['set-cookie'][0]).toMatch(/token=;/);
     });
   });
 });

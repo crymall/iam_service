@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = req.cookies?.token;
 
   if (!token) {
     return res.status(401).json({ error: "Access Denied: No Token Provided" });
@@ -18,7 +17,7 @@ export const authenticateToken = (req, res, next) => {
   });
 };
 
-export const authorizePermission = (requiredPermission) => {
+export const authorizePermissions = (requiredPermission) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ error: "User not authenticated" });

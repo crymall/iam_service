@@ -14,7 +14,7 @@ jest.unstable_mockModule('../../config/db.js', () => ({
 // We assume the user is authenticated for these unit tests.
 jest.unstable_mockModule('../../middleware/authorize.js', () => ({
   authenticateToken: (req, res, next) => next(),
-  authorizePermission: (permission) => (req, res, next) => next(),
+  authorizePermissions: (permission) => (req, res, next) => next(),
 }));
 
 // 3. Mock Auth Router (Isolation)
@@ -63,6 +63,50 @@ describe('Users API', () => {
 
       expect(res.status).toBe(500);
       expect(res.body).toHaveProperty('error', 'Database error');
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('GET /users/:id', () => {
+    it('should return a single user successfully', async () => {
+      const mockUser = {
+        id: 1,
+        username: faker.internet.userName(),
+        email: faker.internet.email(),
+        role: 'Editor',
+      };
+
+      mockQuery.mockResolvedValueOnce({ rowCount: 1, rows: [mockUser] });
+
+      const res = await request(app).get('/users/1');
+
+      expect(res.status).toBe(200);
+      expect(res.body.user).toHaveProperty('username', mockUser.username);
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('WHERE u.id = $1'), ['1']);
+    });
+
+    it('should return 404 if user not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
+
+      const res = await request(app).get('/users/999');
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('User not found');
+    });
+
+    it('should handle database errors', async () => {
+      const originalError = console.error;
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation((err, ...args) => {
+        if (err && err.message === 'DB Error') return;
+        originalError.call(console, err, ...args);
+      });
+
+      mockQuery.mockRejectedValueOnce(new Error('DB Error'));
+
+      const res = await request(app).get('/users/1');
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('Database error');
       consoleSpy.mockRestore();
     });
   });

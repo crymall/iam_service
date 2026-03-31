@@ -9,14 +9,14 @@ jest.unstable_mockModule('jsonwebtoken', () => ({
   },
 }));
 
-const { authenticateToken, authorizePermission } = await import('../authorize.js');
+const { authenticateToken, authorizePermissions } = await import('../authorize.js');
 
 describe('Authorization Middleware', () => {
   let req, res, next;
 
   beforeEach(() => {
     req = {
-      headers: {},
+      cookies: {},
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -37,7 +37,7 @@ describe('Authorization Middleware', () => {
     });
 
     it('should return 403 if token is invalid', () => {
-      req.headers['authorization'] = 'Bearer invalid_token';
+      req.cookies.token = 'invalid_token';
       
       mockVerify.mockImplementation((token, secret, cb) => {
         cb(new Error('Invalid token'), null);
@@ -52,7 +52,7 @@ describe('Authorization Middleware', () => {
     });
 
     it('should call next() and set req.user if token is valid', () => {
-      req.headers['authorization'] = 'Bearer valid_token';
+      req.cookies.token = 'valid_token';
       const mockUser = { id: 1, username: 'test' };
 
       mockVerify.mockImplementation((token, secret, cb) => {
@@ -67,9 +67,9 @@ describe('Authorization Middleware', () => {
     });
   });
 
-  describe('authorizePermission', () => {
+  describe('authorizePermissions', () => {
     it('should return 401 if user is not authenticated', () => {
-      const middleware = authorizePermission('read:data');
+      const middleware = authorizePermissions('read:data');
       middleware(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
@@ -79,7 +79,7 @@ describe('Authorization Middleware', () => {
 
     it('should return 403 if user lacks required permission', () => {
       req.user = { permissions: ['read:other'] };
-      const middleware = authorizePermission('read:data');
+      const middleware = authorizePermissions('read:data');
       middleware(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
@@ -91,7 +91,7 @@ describe('Authorization Middleware', () => {
 
     it('should call next() if user has required permission', () => {
       req.user = { permissions: ['read:data', 'write:data'] };
-      const middleware = authorizePermission('read:data');
+      const middleware = authorizePermissions('read:data');
       middleware(req, res, next);
 
       expect(next).toHaveBeenCalled();

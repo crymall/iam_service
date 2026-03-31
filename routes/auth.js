@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { authenticateToken } from "../middleware/authorize.js";
 
 const authRouter = express.Router();
 
@@ -165,10 +166,20 @@ authRouter.post("/verify-2fa", async (req, res) => {
       { expiresIn: "24h" },
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      domain: isProduction ? ".reedgaines.com" : "localhost",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.json({
       message: "Login successful",
-      token,
       user: {
+        id: user.id,
         username: user.username,
         role: user.role,
         permissions: user.permissions,
@@ -178,6 +189,29 @@ authRouter.post("/verify-2fa", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
+});
+
+authRouter.get("/verify", authenticateToken, (req, res) => {
+  res.json({
+    message: "Authenticated",
+    user: {
+      id: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      permissions: req.user.permissions,
+    },
+  });
+});
+
+authRouter.post("/logout", (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    domain: isProduction ? ".reedgaines.com" : "localhost",
+  });
+  res.json({ message: "Logged out successfully" });
 });
 
 authRouter.get("/", (req, res) => {
