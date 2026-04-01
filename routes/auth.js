@@ -123,7 +123,7 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/verify-2fa", async (req, res) => {
-  const { userId, code } = req.body;
+  const { userId, code, rememberMe } = req.body;
 
   try {
     const codeRes = await pool.query(
@@ -154,6 +154,9 @@ authRouter.post("/verify-2fa", async (req, res) => {
 
     const user = userRes.rows[0];
 
+    const expiresIn = rememberMe ? "30d" : "24h";
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+
     const token = jwt.sign(
       {
         id: user.id,
@@ -163,7 +166,7 @@ authRouter.post("/verify-2fa", async (req, res) => {
         permissions: user.permissions,
       },
       process.env.JWT_SECRET || "dev_secret_key",
-      { expiresIn: "24h" },
+      { expiresIn },
     );
 
     const isProduction = process.env.NODE_ENV === "production";
@@ -173,7 +176,7 @@ authRouter.post("/verify-2fa", async (req, res) => {
       secure: isProduction,
       sameSite: "lax",
       domain: isProduction ? ".reedgaines.com" : "localhost",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge,
     });
 
     res.json({

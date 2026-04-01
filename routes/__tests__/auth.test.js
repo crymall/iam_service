@@ -190,6 +190,33 @@ describe('Auth API', () => {
       expect(res.body.user.role).toBe('Editor');
     });
 
+    it('should set a 30-day cookie when rememberMe is true', async () => {
+      const userId = 1;
+      const code = '123456';
+
+      // Mock 1: Check code validity
+      mockQuery.mockResolvedValueOnce({ rowCount: 1, rows: [{ code }] });
+      
+      // Mock 2: Delete used code
+      mockQuery.mockResolvedValueOnce({});
+      
+      // Mock 3: Get full user details for JWT
+      mockQuery.mockResolvedValueOnce({
+        rows: [{
+          id: userId,
+          username: 'testuser',
+          role: 'Editor',
+          permissions: ['read', 'write'],
+        }],
+      });
+
+      const res = await request(app).post('/verify-2fa').send({ userId, code, rememberMe: true });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['set-cookie']).toBeDefined();
+      expect(res.headers['set-cookie'][0]).toMatch(/Max-Age=2592000/); // 30 days in seconds
+    });
+
     it('should fail with invalid or expired verification code', async () => {
       // Mock 1: Check code (returns no rows)
       mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
