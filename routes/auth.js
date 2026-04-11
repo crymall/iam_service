@@ -110,10 +110,15 @@ authRouter.post("/login", async (req, res) => {
       await sendVerificationEmail(user.email, code);
     }
 
+    const tempToken = jwt.sign(
+      { id: user.id, purpose: "2fa" },
+      process.env.JWT_SECRET || "dev_secret_key",
+      { expiresIn: "10m" }
+    );
+
     res.json({
-      message: "Verification code sent to your email",
-      userId: user.id,
-      temp_token: "Enable this if you want stateless intermediate tokens",
+      message: "Verification code sent to your email from Midden 2FA",
+      temp_token: tempToken,
       dev_code: process.env.SKIP_EMAIL_VERIFICATION === "true" ? code : undefined,
     });
   } catch (err) {
@@ -123,8 +128,20 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/verify-2fa", async (req, res) => {
-  const { userId, code, rememberMe } = req.body;
-
+  const { tempToken, code, rememberMe } = req.body;
+  
+  if (!tempToken) {
+    return res.status(400).json({ error: "Missing temporary token" });
+  }
+  
+  let userId;
+  try {
+    const decoded = jwt.verify(tempToken, process.env.JWT_SECRET || "dev_secret_key");
+    userId = decoded.id;
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired temporary token" });
+  }
+  
   try {
     const codeRes = await pool.query(
       "SELECT * FROM verification_codes WHERE user_id = $1 AND code = $2 AND expires_at > NOW()",

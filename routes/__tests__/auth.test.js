@@ -138,6 +138,7 @@ describe('Auth API', () => {
       expect(res.status).toBe(200);
       expect(mockSendMail).toHaveBeenCalled();
       expect(res.body.message).toContain('Verification code sent');
+      expect(res.body.temp_token).toBeDefined();
     });
 
     it('should fail with invalid credentials', async () => {
@@ -165,6 +166,8 @@ describe('Auth API', () => {
     it('should verify code and return JWT token', async () => {
       const userId = 1;
       const code = '123456';
+      const jwt = (await import('jsonwebtoken')).default;
+      const tempToken = jwt.sign({ id: userId, purpose: '2fa' }, 'test_secret');
 
       // Mock 1: Check code validity
       mockQuery.mockResolvedValueOnce({ rowCount: 1, rows: [{ code }] });
@@ -182,7 +185,7 @@ describe('Auth API', () => {
         }],
       });
 
-      const res = await request(app).post('/verify-2fa').send({ userId, code });
+      const res = await request(app).post('/verify-2fa').send({ tempToken, code });
 
       expect(res.status).toBe(200);
       expect(res.headers['set-cookie']).toBeDefined();
@@ -193,6 +196,8 @@ describe('Auth API', () => {
     it('should set a 30-day cookie when rememberMe is true', async () => {
       const userId = 1;
       const code = '123456';
+      const jwt = (await import('jsonwebtoken')).default;
+      const tempToken = jwt.sign({ id: userId, purpose: '2fa' }, 'test_secret');
 
       // Mock 1: Check code validity
       mockQuery.mockResolvedValueOnce({ rowCount: 1, rows: [{ code }] });
@@ -210,7 +215,7 @@ describe('Auth API', () => {
         }],
       });
 
-      const res = await request(app).post('/verify-2fa').send({ userId, code, rememberMe: true });
+      const res = await request(app).post('/verify-2fa').send({ tempToken, code, rememberMe: true });
 
       expect(res.status).toBe(200);
       expect(res.headers['set-cookie']).toBeDefined();
@@ -218,13 +223,31 @@ describe('Auth API', () => {
     });
 
     it('should fail with invalid or expired verification code', async () => {
+      const userId = 1;
+      const jwt = (await import('jsonwebtoken')).default;
+      const tempToken = jwt.sign({ id: userId, purpose: '2fa' }, 'test_secret');
+
       // Mock 1: Check code (returns no rows)
       mockQuery.mockResolvedValueOnce({ rowCount: 0, rows: [] });
 
-      const res = await request(app).post('/verify-2fa').send({ userId: 1, code: '000000' });
+      const res = await request(app).post('/verify-2fa').send({ tempToken, code: '000000' });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid or expired code');
+    });
+
+    it('should fail if temporary token is missing', async () => {
+      const res = await request(app).post('/verify-2fa').send({ code: '123456' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Missing temporary token');
+    });
+
+    it('should fail if temporary token is invalid', async () => {
+      const res = await request(app).post('/verify-2fa').send({ tempToken: 'invalid.token.here', code: '123456' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Invalid or expired temporary token');
     });
   });
 
