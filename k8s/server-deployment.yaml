@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: iam-server
+      annotations:
+          k8s.grafana.com/scrape: "true"
+          k8s.grafana.com/metrics.portNumber: "3000"
+          k8s.grafana.com/metrics.path: "/metrics"
     spec:
       containers:
       - name: iam-server
