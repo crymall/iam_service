@@ -3,24 +3,25 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import { collectDefaultMetrics, register } from "prom-client";
+import promBundle from "express-prom-bundle";
 
 import authRouter from "./routes/auth.js";
 import usersRouter from "./routes/users.js";
 
 const app = express();
 
-collectDefaultMetrics();
-
-// Expose endpoint for Grafana Alloy to scrape
-app.get("/metrics", async (req, res) => {
-  try {
-    res.set("Content-Type", register.contentType);
-    res.end(await register.metrics());
-  } catch (ex) {
-    res.status(500).send(ex.message);
-  }
+const metricsMiddleware = promBundle({
+  includeMethod: true,
+  includePath: true,
+  includeStatusCode: true,
+  includeUp: true,
+  customLabels: { app: "iam-service" },
+  promClient: {
+    collectDefaultMetrics: {},
+  },
 });
+
+app.use(metricsMiddleware);
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
@@ -30,10 +31,12 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
